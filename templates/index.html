@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp" ng-controller="myCtrl">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta
+      name="description"
+      content="Graphical User Interface for PrognoNetz"
+    />
+    <meta name="author" content="Nishu Singh" />
+
+    <title>Prognonetz</title>
+
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"
+      rel="stylesheet"
+    />
+
+    <!-- Bootstrap core CSS -->
+    <link
+      href="{{ url_for('static', filename='bootstrap.min.css') }}"
+      rel="stylesheet"
+    />
+
+    <!-- Custom styles for this template -->
+    <link
+      href="{{ url_for('static', filename='starter-template.css') }}"
+      rel="stylesheet"
+    />
+    <link
+      href="{{ url_for('static', filename='leaflet.css') }}"
+      rel="stylesheet"
+    />
+    <link
+      href="{{ url_for('static', filename='style.css') }}"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css?family=Montserrat&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-md navbar-light fixed-top">
+      <a class="navbar-brand" href="#"
+        ><img src="/static/Picture 3.png" class="logo"
+      /></a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarsExampleDefault"
+        aria-controls="navbarsExampleDefault"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </nav>
+
+    <main role="main" class="container-fluid">
+      <div class="row">
+        <!-- MAP VIEW -->
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h4>
+                <i class="fa fa-map" aria-hidden="true"></i> Electrical Grid
+              </h4>
+            </div>
+            <div class="card-body">
+              <!-- MAP ID WHERE MAP WILL BE DRAWN -->
+              <div id="mapid"></div>
+              <!--    <p></p>
+              </div> -->
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card" style="height: 28.6rem;">
+            <div class="card-header">
+              <h4>
+                <i class="fa fa-bolt" aria-hidden="true"></i>Ampacity Forecast
+              </h4>
+            </div>
+            <img
+              class="img-fluid"
+              id="imgrealtime"
+              src="{{ url_for('static', filename='amp_realtime.png') }}"
+            />
+            <p>
+              The ampacity forecast shows off an ampacity plot for 48 hours,
+              this section aims at the display of a longer period planning data.
+              It starts with reading a database file which contains a table with
+              measured ampacity for different points in time and 48 hour
+              forecast.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXTRA TAKEN FROM ABOVE FROM BELOW MAP<form class="form-inline mb-2">
+                <div class="form-group mb-2">
+                  <label for="staticEmail2" class="sr-only">Email</label>
+                  <input
+                    type="text"
+                    readonly
+                    class="form-control-plaintext"
+                    id="staticEmail2"
+                    value="Enter Time"
+                  />
+                </div>
+                <div class="form-group mx-sm-3 mb-2">
+                  <label for="inputPassword2" class="sr-only">Password</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    ng-model="timedata.time"
+                    name="time"
+                    id="timeinp"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  class="btn btn-primary mb-2"
+                  id="loading"
+                  class="btn btn-success"
+                  onclick="loadLines()"
+                >
+                  <i
+                    id="loadingLines"
+                    class="fa fa-spin fa-circle-o-notch"
+                    aria-hidden="true"
+                  ></i>
+                  Load Lines
+                </button>
+              </form> -->
+      <!-- TRANSIENT ANALYSIS -->
+      <div class="card mt-5">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card">
+              <div class="card-header">
+                <h4>
+                  <i class="fa fa-area-chart" aria-hidden="true"></i>Transient
+                  Analysis
+                </h4>
+              </div>
+              <div class="card-body">
+                <p>
+                  Considering an initial conductor temperature Tin and current
+                  I0, how much time do we have to transmit these current values
+                  until we reach Tmax?
+                </p>
+                <hr />
+                <div class="row">
+                  <div class="col-md-6">
+                    <img
+                      class="img-fluid"
+                      id="img1"
+                      src="{{ url_for('static', filename='fig_choose.png') }}"
+                    />
+
+                    <!-- 1ST WARNING SHOW AUTOMATIC IF SET -->
+                    <div class="alert alert-warning" ng-show="warning1">
+                      // warning1 //
+                    </div>
+
+                    <!-- 2ST WARNING SHOW AUTOMATIC IF SET -->
+                    <div class="alert alert-warning" ng-show="warning2">
+                      // warning2 //
+                    </div>
+                    <hr ng-show="warning1 || warning2" />
+                  </div>
+
+                  <!-- TRANSIENT ANALYSIS FORM -->
+                  <div class="col-md-6">
+                    <h6>Enter the initial and experimental conditions:</h6>
+                    <form>
+                      <div class="form-group row">
+                        <div class="col-md-6">
+                          <label>Tin in Celsius</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            ng-model="data.temperature"
+                          />
+                        </div>
+                        <!-- <div class="col-md-6">
+                      <label>Number of values</label>
+                      <input type="text" class="form-control" ng-model="data.temperature">
+                    </div> -->
+                      </div>
+                      <div
+                        class="form-group row"
+                        ng-repeat="input in data.values"
+                      >
+                        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-6">
+                          <label>Enter current I//$index// :</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            ng-model="input.current"
+                          />
+                        </div>
+                        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-6">
+                          <label>Time in minutes t//$index// :</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            ng-model="input.time"
+                          />
+                        </div>
+                        <!-- REMOVE INPUT BUTTON FROM PARTICULAR INDEX -->
+                        <div class="col-md-2" ng-show="$index > 0">
+                          <label>Action</label>
+                          <button
+                            class="btn btn-danger"
+                            ng-click="remove($index)"
+                            ng-disabled="loading"
+                          >
+                            X
+                          </button>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <!-- ADD MORE INPUTS BUTTON -->
+                        <button
+                          class="btn btn-info btn-block"
+                          ng-click="addMore()"
+                          ng-disabled="loading"
+                        >
+                          <i class="fa fa-plus" aria-hidden="true"></i> Add More
+                        </button>
+                      </div>
+                      <div class="form-group">
+                        <button
+                          class="btn btn-success btn-block"
+                          ng-click="submit()"
+                          ng-disabled="loading"
+                        >
+                          <i class="fa fa-sign-in" aria-hidden="true"></i>
+                          Submit
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
+                <hr />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mt-5">
+          <div class="card-header">
+            <h4>
+              <i class="fa fa-bar-chart" aria-hidden="true"></i>Accuracy
+              Analysis
+            </h4>
+          </div>
+          <div class="card-body">
+            <hr />
+            <div class="row">
+              <div class="offset-md-3 col-md-6">
+                <table class="table table-bordered table-striped">
+                  <tbody>
+                    <tr>
+                      <!-- <td>MAPE</td> -->
+                      <td><b>Forecast hour</b></td>
+                      <td><b>MAPE</b></td>
+                    </tr>
+                    <tr>
+                      <!-- <td>MAPE</td> -->
+                      <td>1h</td>
+                      <td>12%</td>
+                    </tr>
+                    <tr>
+                      <!-- <td>MAPE</td> -->
+                      <td>24h</td>
+                      <td>15%</td>
+                    </tr>
+                    <tr>
+                      <!-- <td>MAPE</td> -->
+                      <td>48h</td>
+                      <td>16%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- PARTNERS LOGO -->
+              <div class="offset-md-2 col-md-8">
+                <hr />
+                <h2 class="text-center">
+                  <p style="color:rgb(51, 54, 58)	" ;></p>
+                  Project Partners
+                </h2>
+                <hr />
+                <!-- <div class="row">
+                  <div class="col-md-12">
+                    <img
+                      class="img-fluid"
+                      style="width: 100%;"
+                      src="/static/PrognoNetz_Konsortium.png"
+                    />
+                  </div>
+                </div>-->
+                <!-- <div class="slide"><img src="static/Picture .png"></div>
+                    <div class="slide"><img src="static/Picture .png"></div>
+                    <div class="slide"><img src="static/Picture .png"></div>
+                    <div class="slide"><img src="static/Picture .png"></div> -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!-- /.container -->
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.8/angular.min.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery-3.2.1.slim.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.js"></script>
+
+    <script>
+      window.jQuery || document.write('<script src="{{ url_for('static', filename='js/jquery-slim.min.js') }}"><\/script>')
+    </script>
+    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/leaflet.js') }}"></script>
+    <!---- <script src="{{ url_for('static', filename='js/main.js?v=1.1') }}"></script> --->
+    <script src="static/js/main.js?v=1.1"></script>
+  </body>
+</html>
